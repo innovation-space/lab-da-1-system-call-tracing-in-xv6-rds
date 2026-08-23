@@ -119,6 +119,7 @@ allocproc(void)
       release(&p->lock);
     }
   }
+  p->trace_mask = 0;
   return 0;
 
 found:
@@ -280,6 +281,7 @@ kfork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
+  np->trace_mask = p->trace_mask;
 
   // increment reference counts on open file descriptors.
   for (i = 0; i < NOFILE; i++)
