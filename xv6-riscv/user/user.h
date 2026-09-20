@@ -27,6 +27,8 @@ int pause(int);
 int uptime(void);
 int sync(void);
 int trace(int);
+int race_test(int);
+int get_counter(void);
 
 // ulib.c
 int stat(const char *, struct stat *);

@@ -6,7 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
-
+int shared_counter = 0;
 uint64
 sys_exit(void)
 {
@@ -120,4 +120,35 @@ sys_trace(void)
   myproc()->trace_mask = n;
 
   return 0;
+}
+uint64
+sys_race_test(void)
+{
+    int n;
+    int i;
+    int temp;
+
+    argint(0, &n);
+
+    if(n == 0){
+        shared_counter = 0;
+        return 0;
+    }
+
+    for(i = 0; i < n; i++){
+        temp = shared_counter;
+
+        for(volatile int j = 0; j < 100000; j++);
+
+        temp++;
+
+        shared_counter = temp;
+    }
+
+    return shared_counter;
+}
+uint64
+sys_get_counter(void)
+{
+    return shared_counter;
 }

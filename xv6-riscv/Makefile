@@ -148,6 +148,7 @@ UPROGS=\
 	$U/_sync\
 	$U/_trace\
 	$U/_tracetest\
+	$U/_race_test\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

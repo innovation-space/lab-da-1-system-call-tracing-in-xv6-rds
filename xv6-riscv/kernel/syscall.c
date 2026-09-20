@@ -104,6 +104,8 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_sync(void);
 extern uint64 sys_trace(void);
+extern uint64 sys_race_test(void);
+extern uint64 sys_get_counter(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -132,6 +134,8 @@ static uint64 (*syscalls[])(void) = {
   [SYS_close]   sys_close,
   [SYS_sync]    sys_sync,
   [SYS_trace] sys_trace,
+  [SYS_race_test] sys_race_test,
+  [SYS_get_counter] sys_get_counter,
   // clang-format on
 };
 

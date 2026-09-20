@@ -44,3 +44,5 @@ entry("pause");
 entry("uptime");
 entry("sync");
 entry("trace");
+entry("race_test");
+entry("get_counter");
