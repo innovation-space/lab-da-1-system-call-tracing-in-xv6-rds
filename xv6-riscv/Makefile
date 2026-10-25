@@ -149,6 +149,7 @@ UPROGS=\
 	$U/_trace\
 	$U/_tracetest\
 	$U/_race_test\
+	$U/_vmmaptest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

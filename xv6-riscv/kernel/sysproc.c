@@ -152,3 +152,32 @@ sys_get_counter(void)
 {
     return shared_counter;
 }
+uint64
+sys_vmmap(void)
+{
+  struct proc *p = myproc();
+  uint64 va;
+  pte_t *pte;
+
+  printk("Page table mappings for PID %d\n", p->pid);
+  printk("Virtual Address -> Physical Address | R W X\n");
+
+  for (va = 0; va < p->sz; va += PGSIZE) {
+    pte = walk(p->pagetable, va, 0);
+
+    if (pte == 0 || (*pte & PTE_V) == 0)
+      continue;
+
+    if ((*pte & PTE_U) == 0)
+      continue;
+
+    printk("%p -> %p | %c %c %c\n",
+           (void *)va,
+           (void *)PTE2PA(*pte),
+           (*pte & PTE_R) ? 'R' : '-',
+           (*pte & PTE_W) ? 'W' : '-',
+           (*pte & PTE_X) ? 'X' : '-');
+  }
+
+  return 0;
+}

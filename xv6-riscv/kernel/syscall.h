@@ -24,3 +24,4 @@
 #define SYS_trace  23
 #define SYS_race_test    24
 #define SYS_get_counter  25
+#define SYS_vmmap 26

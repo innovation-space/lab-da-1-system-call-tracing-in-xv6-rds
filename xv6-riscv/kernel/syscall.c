@@ -106,6 +106,8 @@ extern uint64 sys_sync(void);
 extern uint64 sys_trace(void);
 extern uint64 sys_race_test(void);
 extern uint64 sys_get_counter(void);
+extern uint64 sys_vmmap(void);
+
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -136,6 +138,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_trace] sys_trace,
   [SYS_race_test] sys_race_test,
   [SYS_get_counter] sys_get_counter,
+  [SYS_vmmap] sys_vmmap,
   // clang-format on
 };
 

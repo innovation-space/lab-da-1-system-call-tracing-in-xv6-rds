@@ -29,6 +29,7 @@ int sync(void);
 int trace(int);
 int race_test(int);
 int get_counter(void);
+int vmmap(void);
 
 // ulib.c
 int stat(const char *, struct stat *);
