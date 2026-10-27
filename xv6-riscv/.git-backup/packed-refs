@@ -1,0 +1,3 @@
+# pack-refs with: peeled fully-peeled sorted 
+25348327e624e91a51673b3808862e156c751212 refs/remotes/origin/riscv
+7d7adbb1b0acbd67c9766a20d0f9900fef2789fa refs/tags/xv6-riscv-rev5
