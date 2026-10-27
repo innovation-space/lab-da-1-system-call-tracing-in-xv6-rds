@@ -152,8 +152,9 @@ UPROGS=\
 	$U/_vmmaptest\
 	$U/_vmtest\
 	$U/_filetest\
-    $U/_statcheck
-	
+	$U/_statcheck\
+	$U/_sharetest\
+
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
 
