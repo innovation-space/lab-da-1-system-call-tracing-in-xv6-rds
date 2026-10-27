@@ -154,6 +154,7 @@ UPROGS=\
 	$U/_filetest\
 	$U/_statcheck\
 	$U/_sharetest\
+	$U/_fstest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
