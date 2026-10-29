@@ -29,5 +29,9 @@ struct message_queue {
 };
 
 void msgqueue_init(void);
+int msgqueue_send(int queue_id, int sender_pid,
+                  const char *data, int length, int priority);
+
+int msgqueue_receive(int queue_id, struct message *out);
 
 #endif
