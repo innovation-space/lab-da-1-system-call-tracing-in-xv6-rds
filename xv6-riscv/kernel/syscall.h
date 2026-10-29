@@ -25,3 +25,9 @@
 #define SYS_race_test    24
 #define SYS_get_counter  25
 #define SYS_vmmap 26
+#define SYS_mq_create       28
+#define SYS_mq_destroy      29
+#define SYS_mq_send         30
+#define SYS_mq_receive      31
+#define SYS_mq_try_send     32
+#define SYS_mq_try_receive  33

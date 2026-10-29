@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "msgqueue.h"
 int shared_counter = 0;
 uint64
 sys_exit(void)
@@ -178,6 +179,105 @@ sys_vmmap(void)
            (*pte & PTE_W) ? 'W' : '-',
            (*pte & PTE_X) ? 'X' : '-');
   }
+
+  return 0;
+}
+uint64
+sys_mq_create(void)
+{
+  return msgqueue_create();
+}
+
+uint64
+sys_mq_destroy(void)
+{
+  int queue_id;
+
+  argint(0, &queue_id);
+  return msgqueue_destroy(queue_id);
+}
+
+
+uint64
+sys_mq_send(void)
+{
+  int queue_id, length, priority;
+  uint64 data_addr;
+  char data[MSGQUEUE_MAX_SIZE];
+
+  argint(0, &queue_id);
+  argaddr(1, &data_addr);
+  argint(2, &length);
+  argint(3, &priority);
+
+  if(length <= 0 || length > MSGQUEUE_MAX_SIZE)
+    return -1;
+
+  if(copyin(myproc()->pagetable, 0, data, data_addr, length) < 0)
+    return -1;
+
+  return msgqueue_send(queue_id, myproc()->pid,
+                       data, length, priority);
+}
+
+uint64
+sys_mq_receive(void)
+{
+  int queue_id;
+  uint64 out_addr;
+  struct message msg;
+
+  argint(0, &queue_id);
+  argaddr(1, &out_addr);
+
+  if(msgqueue_receive(queue_id, &msg) < 0)
+    return -1;
+
+  if(copyout(myproc()->pagetable, 0, out_addr,
+             (char *)&msg, sizeof(msg)) < 0)
+    return -1;
+
+  return 0;
+}
+
+uint64
+sys_mq_try_send(void)
+{
+  int queue_id, length, priority;
+  uint64 data_addr;
+  char data[MSGQUEUE_MAX_SIZE];
+
+  argint(0, &queue_id);
+  argaddr(1, &data_addr);
+  argint(2, &length);
+  argint(3, &priority);
+
+  if(length <= 0 || length > MSGQUEUE_MAX_SIZE)
+    return -1;
+
+  if(copyin(myproc()->pagetable, 0, data, data_addr, length) < 0)
+    return -1;
+
+  return msgqueue_try_send(queue_id, myproc()->pid,
+                           data, length, priority);
+}
+
+uint64
+sys_mq_try_receive(void)
+{
+  int queue_id;
+  uint64 out_addr;
+  struct message msg;
+
+  argint(0, &queue_id);
+  argaddr(1, &out_addr);
+
+  if(msgqueue_try_receive(queue_id, &msg) < 0)
+    return -1;
+
+  if(copyout(myproc()->pagetable, 0, out_addr,
+             (char *)&msg, sizeof(msg)) < 0)
+    return -1;
 
   return 0;
 }

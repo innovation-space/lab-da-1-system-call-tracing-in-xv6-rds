@@ -30,6 +30,18 @@ int trace(int);
 int race_test(int);
 int get_counter(void);
 int vmmap(void);
+int mq_create(void);
+int mq_destroy(int queue_id);
+int mq_send(int queue_id, const char *data, int length, int priority);
+struct mq_message {
+  int sender_pid;
+  int length;
+  int priority;
+  char data[64];
+};
+int mq_receive(int queue_id, struct mq_message *out);
+int mq_try_send(int queue_id, const char *data, int length, int priority);
+int mq_try_receive(int queue_id, struct mq_message *out);
 
 // ulib.c
 int stat(const char *, struct stat *);

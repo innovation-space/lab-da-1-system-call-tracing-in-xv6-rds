@@ -107,6 +107,12 @@ extern uint64 sys_trace(void);
 extern uint64 sys_race_test(void);
 extern uint64 sys_get_counter(void);
 extern uint64 sys_vmmap(void);
+extern uint64 sys_mq_create(void);
+extern uint64 sys_mq_destroy(void);
+extern uint64 sys_mq_send(void);
+extern uint64 sys_mq_receive(void);
+extern uint64 sys_mq_try_send(void);
+extern uint64 sys_mq_try_receive(void);
 
 
 // An array mapping syscall numbers from syscall.h
@@ -139,6 +145,12 @@ static uint64 (*syscalls[])(void) = {
   [SYS_race_test] sys_race_test,
   [SYS_get_counter] sys_get_counter,
   [SYS_vmmap] sys_vmmap,
+  [SYS_mq_create]       sys_mq_create,
+  [SYS_mq_destroy]      sys_mq_destroy,
+  [SYS_mq_send]         sys_mq_send,
+  [SYS_mq_receive]      sys_mq_receive,
+  [SYS_mq_try_send]     sys_mq_try_send,
+  [SYS_mq_try_receive]  sys_mq_try_receive,
   // clang-format on
 };
 
