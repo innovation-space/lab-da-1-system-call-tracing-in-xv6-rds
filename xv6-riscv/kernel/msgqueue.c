@@ -19,7 +19,9 @@ msgqueue_init(void)
     queues[i].tail = 0;
     queues[i].count = 0;
     queues[i].id = i;
-    queues[i].initialized = 1;
+    queues[i].initialized = 0;
+    queues[i].waiting_senders = 0;
+    queues[i].waiting_receivers = 0;
   }
 }
 int
@@ -40,19 +42,25 @@ msgqueue_send(int queue_id, int sender_pid,
 
   q = &queues[queue_id];
   acquire(&queue_locks[queue_id]);
+ if(!q->initialized){
+  release(&queue_locks[queue_id]);
+  return -1;
+}
 
-  while(q->count == MSGQUEUE_CAPACITY){
-    if(killed(pr)){
-      release(&queue_locks[queue_id]);
-      return -1;
-    }
-
-    wakeup(q);
-    sleep_prepare(q);
+while(q->count == MSGQUEUE_CAPACITY){
+  if(killed(pr)){
     release(&queue_locks[queue_id]);
-    sleep();
-    acquire(&queue_locks[queue_id]);
+    return -1;
   }
+
+  q->waiting_senders++;
+  wakeup(q);
+  sleep_prepare(q);
+  release(&queue_locks[queue_id]);
+  sleep();
+  acquire(&queue_locks[queue_id]);
+  q->waiting_senders--;
+}
 
   m = &q->messages[q->tail];
   m->sender_pid = sender_pid;
@@ -82,20 +90,27 @@ msgqueue_receive(int queue_id, struct message *out)
   if(queue_id < 0 || queue_id >= MSGQUEUE_COUNT || out == 0)
     return -1;
 
-  q = &queues[queue_id];
-  acquire(&queue_locks[queue_id]);
+q = &queues[queue_id];
+acquire(&queue_locks[queue_id]);
 
-  while(q->count == 0){
-    if(killed(pr)){
-      release(&queue_locks[queue_id]);
-      return -1;
-    }
+if(!q->initialized){
+  release(&queue_locks[queue_id]);
+  return -1;
+}
 
-    sleep_prepare(q);
+while(q->count == 0){
+  if(killed(pr)){
     release(&queue_locks[queue_id]);
-    sleep();
-    acquire(&queue_locks[queue_id]);
+    return -1;
   }
+
+  q->waiting_receivers++;
+  sleep_prepare(q);
+  release(&queue_locks[queue_id]);
+  sleep();
+  acquire(&queue_locks[queue_id]);
+  q->waiting_receivers--;
+}
 
   best = 0;
   for(i = 1; i < q->count; i++){
@@ -129,6 +144,7 @@ msgqueue_receive(int queue_id, struct message *out)
   return 0;
 }
 
+
 int
 msgqueue_try_send(int queue_id, int sender_pid,
                   const char *data, int length, int priority)
@@ -146,6 +162,11 @@ msgqueue_try_send(int queue_id, int sender_pid,
 
   q = &queues[queue_id];
   acquire(&queue_locks[queue_id]);
+
+  if(!q->initialized){
+    release(&queue_locks[queue_id]);
+    return -1;
+  }
 
   if(q->count == MSGQUEUE_CAPACITY){
     release(&queue_locks[queue_id]);
@@ -168,6 +189,8 @@ msgqueue_try_send(int queue_id, int sender_pid,
   return 0;
 }
 
+
+
 int
 msgqueue_try_receive(int queue_id, struct message *out)
 {
@@ -182,6 +205,11 @@ msgqueue_try_receive(int queue_id, struct message *out)
 
   q = &queues[queue_id];
   acquire(&queue_locks[queue_id]);
+
+  if(!q->initialized){
+    release(&queue_locks[queue_id]);
+    return -1;
+  }
 
   if(q->count == 0){
     release(&queue_locks[queue_id]);
@@ -216,6 +244,59 @@ msgqueue_try_receive(int queue_id, struct message *out)
   q->count--;
 
   wakeup(q);
+  release(&queue_locks[queue_id]);
+  return 0;
+}
+
+int
+msgqueue_create(void)
+{
+  int i;
+  struct message_queue *q;
+
+  for(i = 0; i < MSGQUEUE_COUNT; i++){
+    acquire(&queue_locks[i]);
+    q = &queues[i];
+
+    if(!q->initialized){
+      q->head = 0;
+      q->tail = 0;
+      q->count = 0;
+      q->waiting_senders = 0;
+      q->waiting_receivers = 0;
+      q->initialized = 1;
+
+      release(&queue_locks[i]);
+      return i;
+    }
+
+    release(&queue_locks[i]);
+  }
+
+  return -1;
+}
+
+int
+msgqueue_destroy(int queue_id)
+{
+  struct message_queue *q;
+
+  if(queue_id < 0 || queue_id >= MSGQUEUE_COUNT)
+    return -1;
+
+  q = &queues[queue_id];
+  acquire(&queue_locks[queue_id]);
+
+  if(!q->initialized || q->count != 0 ||
+     q->waiting_senders != 0 || q->waiting_receivers != 0){
+    release(&queue_locks[queue_id]);
+    return -1;
+  }
+
+  q->initialized = 0;
+  q->head = 0;
+  q->tail = 0;
+
   release(&queue_locks[queue_id]);
   return 0;
 }

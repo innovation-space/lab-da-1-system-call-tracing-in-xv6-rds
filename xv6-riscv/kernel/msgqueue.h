@@ -25,6 +25,8 @@ struct message_queue {
   int count;
   int id;
   int initialized;
+  int waiting_senders;
+  int waiting_receivers;
 };
 
 void msgqueue_init(void);
@@ -38,5 +40,7 @@ int msgqueue_try_send(int queue_id, int sender_pid,
                       const char *data, int length, int priority);
 
 int msgqueue_try_receive(int queue_id, struct message *out);
+int msgqueue_create(void);
+int msgqueue_destroy(int queue_id);
 
 #endif
