@@ -158,6 +158,8 @@ UPROGS=\
 	$U/_mqtest\
 	$U/_fstest\
 	$U/_mqexttest\
+	$U/_mqpriotest\
+	$U/_mqblocktest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
